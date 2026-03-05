@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CeramicaApp 🏺</title>
+<style>
+:root {
+  --bg: #160E08;
+  --bg2: #1F1208;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+  --gold: #E8C97A;
+  --gold2: #C4933F;
+  --text: #F5ECD7;
+  --muted: rgba(245,236,215,0.4);
+  --dim: rgba(245,236,215,0.2);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:var(--bg); min-height:100vh; font-family:Georgia,serif; color:var(--text); overflow-x:hidden; }
+.screen { display:none; min-height:100vh; }
+.screen.active { display:flex; flex-direction:column; }
+
+/* ── LOGIN ── */
+#loginScreen {
+  background: radial-gradient(ellipse at 30% 20%, #3D1F10 0%, #160E08 60%);
+  align-items:center; justify-content:center; padding:40px 24px; gap:0;
+}
+.login-pot { font-size:72px; animation:bob 3s ease-in-out infinite; margin-bottom:10px; }
+@keyframes bob { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-12px) rotate(3deg)} }
+.login-brand { font-size:30px; font-weight:bold; color:var(--gold); letter-spacing:3px; }
+.login-tagline { font-size:10px; color:var(--dim); letter-spacing:4px; margin-bottom:40px; }
+.login-box { width:100%; max-width:320px; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:20px; padding:24px 20px; }
+.login-box h3 { color:var(--gold); font-size:15px; text-align:center; margin-bottom:18px; }
+.li { width:100%; padding:12px 14px; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:11px; color:var(--text); font-size:13px; outline:none; font-family:Georgia,serif; margin-bottom:10px; }
+.li::placeholder { color:var(--dim); }
+.lb { width:100%; padding:13px; background:var(--gold); border:none; border-radius:11px; color:#1A0A02; font-size:14px; font-weight:bold; cursor:pointer; font-family:Georgia,serif; margin-bottom:10px; }
+.divider { text-align:center; color:var(--dim); font-size:11px; margin:4px 0 10px; }
+.gb { width:100%; padding:12px; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:11px; color:var(--text); font-size:13px; cursor:pointer; font-family:Georgia,serif; }
+.ls { text-align:center; margin-top:14px; font-size:12px; color:var(--muted); }
+.ls span { color:var(--gold); cursor:pointer; }
+.demo { margin-top:16px; text-align:center; }
+.demo button { background:none; border:1px dashed rgba(232,201,122,0.25); border-radius:10px; color:rgba(232,201,122,0.5); padding:7px 18px; cursor:pointer; font-size:11px; font-family:Georgia,serif; }
+
+/* ── APP SHELL ── */
+#appScreen { background:var(--bg); }
+.topbar { position:sticky; top:0; z-index:200; background:rgba(22,14,8,0.97); border-bottom:1px solid var(--border); padding:11px 16px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.tl { display:flex; align-items:center; gap:8px; }
+.tl-name { font-size:17px; font-weight:bold; color:var(--gold); }
+.avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold; color:#1A0A02; cursor:pointer; flex-shrink:0; }
+
+/* SPACE TOGGLE */
+.space-toggle { display:flex; background:rgba(255,255,255,0.05); border-radius:11px; padding:3px; margin:10px 16px 6px; border:1px solid var(--border); flex-shrink:0; }
+.sp-btn { flex:1; padding:8px; border:none; border-radius:9px; cursor:pointer; font-family:Georgia,serif; font-size:12px; font-weight:bold; background:none; color:var(--muted); transition:all 0.2s; }
+.sp-btn.active { background:var(--gold); color:#1A0A02; }
+
+/* TAB PILLS */
+.pills { display:flex; padding:0 16px; gap:6px; margin-bottom:2px; overflow-x:auto; scrollbar-width:none; flex-shrink:0; }
+.pills::-webkit-scrollbar { display:none; }
+.pill { padding:5px 13px; border-radius:20px; font-size:11px; cursor:pointer; white-space:nowrap; border:none; font-family:Georgia,serif; background:rgba(255,255,255,0.06); color:var(--muted); }
+.pill.active { background:rgba(232,201,122,0.18); color:var(--gold); font-weight:bold; }
+
+/* SCROLL AREA */
+.scroll-area { flex:1; overflow-y:auto; padding:12px 16px 90px; }
+
+/* CARDS */
+.card { background:var(--card); border-radius:15px; margin-bottom:10px; border:1px solid var(--border); overflow:hidden; }
+.card-head { padding:13px; display:flex; align-items:center; gap:11px; cursor:pointer; }
+.swatch { width:44px; height:44px; border-radius:11px; flex-shrink:0; border:2px solid rgba(255,255,255,0.12); }
+.ci { flex:1; min-width:0; }
+.cn { font-weight:bold; font-size:14px; }
+.cm { font-size:11px; color:var(--muted); margin-top:2px; }
+.ctags { display:flex; gap:4px; margin-top:4px; flex-wrap:wrap; }
+.tag { font-size:10px; padding:2px 7px; border-radius:8px; background:rgba(255,255,255,0.06); color:var(--muted); }
+.tag.ok { background:rgba(100,220,100,0.12); color:#90EE90; }
+.tag.test { background:rgba(232,201,122,0.12); color:var(--gold); }
+.tag.fail { background:rgba(255,100,100,0.12); color:#ff9999; }
+.cactions { display:flex; flex-direction:column; gap:4px; }
+.ab { border:none; border-radius:7px; padding:4px 8px; cursor:pointer; font-size:10px; font-family:Georgia,serif; white-space:nowrap; }
+.ab-like { background:rgba(255,255,255,0.07); color:var(--text); }
+.ab-like.liked { background:rgba(255,100,100,0.18); color:#ff9999; }
+.ab-share { background:rgba(100,220,100,0.12); color:#90EE90; }
+.ab-calc { background:rgba(232,201,122,0.1); color:var(--gold); }
+.ab-del { background:rgba(255,80,80,0.08); color:#ff8888; }
+.card-detail { padding:0 13px 13px; border-top:1px solid rgba(255,255,255,0.05); display:none; }
+.card-detail.open { display:block; }
+.dl { font-size:10px; color:var(--gold); letter-spacing:1px; font-weight:bold; margin:10px 0 5px; }
+.ir { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:12px; }
+.in { color:rgba(255,255,255,0.55); }
+.ip { color:var(--gold); font-weight:bold; }
+.nb { background:rgba(255,255,255,0.03); border-radius:9px; padding:9px 11px; margin-top:8px; font-size:12px; color:rgba(255,255,255,0.5); line-height:1.6; }
+
+/* EMPTY */
+.empty { text-align:center; padding:44px 20px; }
+.empty-i { font-size:46px; margin-bottom:12px; }
+.empty-t { font-size:14px; color:rgba(255,255,255,0.4); margin-bottom:6px; }
+.empty-s { font-size:12px; color:var(--dim); line-height:1.7; }
+.empty-cta { margin-top:18px; padding:11px 22px; background:var(--gold); border:none; border-radius:11px; color:#1A0A02; font-size:13px; font-weight:bold; cursor:pointer; font-family:Georgia,serif; }
+
+/* FORMS */
+.fs { background:rgba(255,255,255,0.03); border-radius:14px; padding:14px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.06); }
+.fl { font-size:10px; color:var(--gold); letter-spacing:1px; display:block; margin-bottom:7px; }
+.fi { width:100%; padding:10px 12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:9px; color:var(--text); font-size:13px; outline:none; font-family:Georgia,serif; margin-bottom:7px; }
+.fi::placeholder { color:var(--dim); }
+select.fi option { background:#1A0A02; }
+.fr { display:flex; gap:7px; }
+.fr .fi { flex:1; }
+.cp-row { display:flex; gap:7px; align-items:center; margin-bottom:7px; }
+.cp-row .fi { flex:1; margin-bottom:0; }
+.cp-row input[type="color"] { width:40px; height:40px; border-radius:9px; border:1px solid var(--border); cursor:pointer; background:none; flex-shrink:0; }
+.ip-pair { display:flex; gap:6px; margin-bottom:5px; }
+.ip-pair .fi { margin-bottom:0; }
+.ip-pair .fi:first-child { flex:2; }
+.ip-pair .fi:last-child { flex:1; }
+.aib { width:100%; padding:8px; background:rgba(232,201,122,0.07); border:1px dashed rgba(232,201,122,0.2); border-radius:9px; color:rgba(232,201,122,0.6); cursor:pointer; font-size:11px; font-family:Georgia,serif; margin-top:2px; margin-bottom:7px; }
+.sr { display:flex; gap:5px; margin-bottom:7px; }
+.so { flex:1; padding:7px 4px; border-radius:9px; font-size:10px; cursor:pointer; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--muted); text-align:center; font-family:Georgia,serif; }
+.so.s-test { background:rgba(232,201,122,0.15); border-color:var(--gold); color:var(--gold); font-weight:bold; }
+.so.s-ok { background:rgba(100,220,100,0.12); border-color:#90EE90; color:#90EE90; font-weight:bold; }
+.so.s-fail { background:rgba(255,100,100,0.1); border-color:#ff9999; color:#ff9999; font-weight:bold; }
+.sbtn { width:100%; padding:13px; background:var(--gold); border:none; border-radius:11px; color:#1A0A02; font-size:14px; font-weight:bold; cursor:pointer; font-family:Georgia,serif; }
+
+/* CALC */
+.wb { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:7px; }
+.wbtn { flex:1; min-width:48px; padding:8px 4px; border-radius:9px; font-size:11px; cursor:pointer; background:rgba(255,255,255,0.06); color:var(--text); border:1px solid var(--border); font-family:Georgia,serif; text-align:center; }
+.wbtn.active { background:var(--gold); color:#1A0A02; border-color:var(--gold); font-weight:bold; }
+.cr-card { background:var(--card); border-radius:13px; padding:14px; border:1px solid var(--border); margin-top:12px; }
+.cr-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+.cr-ing { font-size:12px; color:rgba(255,255,255,0.6); }
+.cr-g { background:rgba(232,201,122,0.15); border-radius:7px; padding:3px 9px; font-size:12px; font-weight:bold; color:var(--gold); }
+.cr-total { display:flex; justify-content:space-between; margin-top:9px; background:rgba(232,201,122,0.07); border-radius:9px; padding:9px 11px; font-weight:bold; font-size:12px; }
+.cr-total span:last-child { color:var(--gold); }
+
+/* TIPS */
+.tc { background:var(--card); border-radius:13px; margin-bottom:9px; border:1px solid rgba(255,255,255,0.06); overflow:hidden; }
+.th { padding:11px 13px; display:flex; align-items:center; gap:9px; }
+.tb { padding:0 13px 11px; }
+.ti { display:flex; gap:7px; margin-bottom:6px; }
+.ta { color:var(--gold); font-size:10px; margin-top:3px; flex-shrink:0; }
+.tt { font-size:11px; color:rgba(255,255,255,0.55); line-height:1.6; }
+
+/* ── AI CHAT ── */
+#aiScreen {
+  position:fixed; inset:0; z-index:300;
+  background:var(--bg);
+  display:none; flex-direction:column;
+}
+#aiScreen.open { display:flex; }
+.ai-topbar { padding:12px 16px; background:rgba(22,14,8,0.97); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.ai-back { background:none; border:none; color:var(--gold); font-size:22px; cursor:pointer; padding:0 6px 0 0; }
+.ai-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#E8C97A,#8B4513); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.ai-info { flex:1; }
+.ai-name { font-size:14px; font-weight:bold; color:var(--gold); }
+.ai-status { font-size:10px; color:rgba(100,220,100,0.8); }
+.ai-pro { background:rgba(232,201,122,0.15); border:1px solid rgba(232,201,122,0.25); border-radius:8px; padding:3px 8px; font-size:10px; color:var(--gold); }
+
+.ai-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.msg { display:flex; gap:8px; align-items:flex-end; }
+.msg.user { flex-direction:row-reverse; }
+.msg-avatar { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; }
+.msg-avatar.bot { background:linear-gradient(135deg,#E8C97A,#8B4513); }
+.msg-avatar.usr { background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#1A0A02; font-weight:bold; font-size:11px; }
+.bubble { max-width:75%; padding:10px 13px; border-radius:16px; font-size:13px; line-height:1.6; }
+.bubble.bot { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.08); border-bottom-left-radius:4px; color:var(--text); }
+.bubble.usr { background:linear-gradient(135deg,rgba(232,201,122,0.25),rgba(196,147,63,0.2)); border:1px solid rgba(232,201,122,0.2); border-bottom-right-radius:4px; color:var(--text); }
+.bubble.typing { padding:12px 16px; }
+.dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--gold); margin:0 2px; animation:pulse 1.2s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay:0.2s; }
+.dot:nth-child(3) { animation-delay:0.4s; }
+@keyframes pulse { 0%,100%{opacity:0.3;transform:scale(0.8)} 50%{opacity:1;transform:scale(1)} }
+
+.ai-suggestions { padding:8px 14px; display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; flex-shrink:0; }
+.ai-suggestions::-webkit-scrollbar { display:none; }
+.sug { padding:6px 12px; background:rgba(232,201,122,0.08); border:1px solid rgba(232,201,122,0.18); border-radius:20px; font-size:11px; color:var(--gold); white-space:nowrap; cursor:pointer; font-family:Georgia,serif; flex-shrink:0; }
+
+.ai-input-bar { padding:10px 14px; background:rgba(22,14,8,0.97); border-top:1px solid var(--border); display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.ai-input { flex:1; padding:11px 14px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:22px; color:var(--text); font-size:13px; outline:none; font-family:Georgia,serif; }
+.ai-input::placeholder { color:var(--dim); }
+.ai-send { width:40px; height:40px; border-radius:50%; background:var(--gold); border:none; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ai-send:disabled { background:rgba(255,255,255,0.1); cursor:not-allowed; }
+
+/* AI FAB */
+.ai-fab { position:fixed; bottom:90px; right:16px; z-index:150; width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); border:none; cursor:pointer; font-size:22px; box-shadow:0 4px 20px rgba(232,201,122,0.4); display:flex; align-items:center; justify-content:center; animation:glow 2s ease-in-out infinite; }
+@keyframes glow { 0%,100%{box-shadow:0 4px 20px rgba(232,201,122,0.4)} 50%{box-shadow:0 4px 30px rgba(232,201,122,0.7)} }
+.ai-fab-label { position:fixed; bottom:148px; right:12px; z-index:150; background:rgba(22,14,8,0.9); border:1px solid rgba(232,201,122,0.2); border-radius:10px; padding:5px 10px; font-size:10px; color:var(--gold); white-space:nowrap; }
+
+/* COMMUNITY BANNER */
+.comm-banner { background:linear-gradient(135deg,rgba(232,201,122,0.1),rgba(196,147,63,0.06)); border:1px solid rgba(232,201,122,0.15); border-radius:13px; padding:13px 15px; margin-bottom:12px; display:flex; align-items:center; gap:11px; }
+.cb-icon { font-size:26px; }
+.cb-title { font-size:12px; font-weight:bold; color:var(--gold); margin-bottom:2px; }
+.cb-sub { font-size:11px; color:var(--muted); line-height:1.5; }
+
+/* PROFILE */
+.prof-header { background:var(--card); border-radius:15px; padding:18px; margin-bottom:10px; text-align:center; border:1px solid var(--border); }
+.prof-av { width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold2)); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:bold; color:#1A0A02; margin:0 auto 8px; }
+.prof-name { font-size:17px; font-weight:bold; }
+.prof-email { font-size:11px; color:var(--muted); margin-top:3px; }
+.stats { display:flex; gap:8px; margin-top:12px; }
+.stat { flex:1; background:rgba(255,255,255,0.04); border-radius:11px; padding:11px 6px; text-align:center; }
+.sn { font-size:20px; font-weight:bold; color:var(--gold); }
+.sl { font-size:9px; color:var(--dim); margin-top:2px; }
+.logout { width:100%; padding:12px; background:rgba(255,80,80,0.08); border:1px solid rgba(255,80,80,0.15); border-radius:11px; color:#ff9999; font-size:13px; cursor:pointer; font-family:Georgia,serif; margin-top:10px; }
+
+/* BOTTOM NAV */
+.bnav { position:fixed; bottom:0; left:0; right:0; z-index:100; background:rgba(22,14,8,0.97); border-top:1px solid var(--border); display:flex; }
+.nb { flex:1; padding:9px 0 12px; background:none; border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; font-family:Georgia,serif; }
+.ni { font-size:18px; }
+.nl { font-size:9px; color:var(--dim); }
+.nb.active .nl { color:var(--gold); font-weight:bold; }
+.nd { width:16px; height:2px; background:var(--gold); border-radius:2px; margin-top:1px; display:none; }
+.nb.active .nd { display:block; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-pot">🏺</div>
+  <div class="login-brand">CeramicaApp</div>
+  <div class="login-tagline">COMUNIDAD · RECETAS · IA CERÁMICA</div>
+  <div class="login-box">
+    <h3>Iniciar sesión</h3>
+    <input class="li" id="lEmail" type="email" placeholder="Correo electrónico">
+    <input class="li" id="lPass" type="password" placeholder="Contraseña">
+    <button class="lb" onclick="doLogin()">Entrar</button>
+    <div class="divider">— o continúa con —</div>
+    <button class="gb" onclick="doLogin()">🔵 &nbsp;Google</button>
+    <div class="ls">¿No tienes cuenta? <span onclick="doLogin()">Regístrate gratis</span></div>
+  </div>
+  <div class="demo"><button onclick="doLogin()">👀 Ver demo sin cuenta</button></div>
+</div>
+
+<!-- APP -->
+<div id="appScreen" class="screen">
+  <div class="topbar">
+    <div class="tl"><span style="font-size:20px">🏺</span><span class="tl-name">CeramicaApp</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="spaceLabel" style="font-size:10px;color:var(--dim)">Mi Taller 🔒</span>
+      <div class="avatar" id="userAv" onclick="showProfile()">A</div>
+    </div>
+  </div>
+  <div class="space-toggle">
+    <button class="sp-btn active" id="btnT" onclick="switchSpace('taller')">🔒 Mi Taller</button>
+    <button class="sp-btn" id="btnC" onclick="switchSpace('comunidad')">🌍 Comunidad</button>
+  </div>
+  <div class="pills" id="pillBar"></div>
+  <div class="scroll-area" id="scrollArea"></div>
+  <button class="ai-fab" onclick="openAI()">🤖</button>
+  <div class="ai-fab-label">IA Cerámica ✨</div>
+  <nav class="bnav">
+    <button class="nb active" id="nav-r" onclick="setNav('r',this)"><span class="ni">📋</span><span class="nl">Recetas</span><div class="nd"></div></button>
+    <button class="nb" id="nav-c" onclick="setNav('c',this)"><span class="ni">⚖️</span><span class="nl">Calcular</span><div class="nd"></div></button>
+    <button class="nb" id="nav-a" onclick="setNav('a',this)"><span class="ni">➕</span><span class="nl">Agregar</span><div class="nd"></div></button>
+    <button class="nb" id="nav-t" onclick="setNav('t',this)"><span class="ni">💡</span><span class="nl">Tips</span><div class="nd"></div></button>
+  </nav>
+</div>
+
+<!-- AI CHAT -->
+<div id="aiScreen">
+  <div class="ai-topbar">
+    <button class="ai-back" onclick="closeAI()">‹</button>
+    <div class="ai-avatar">🤖</div>
+    <div class="ai-info">
+      <div class="ai-name">Asistente Cerámico IA</div>
+      <div class="ai-status">● En línea</div>
+    </div>
+    <div class="ai-pro">✨ Pro</div>
+  </div>
+  <div class="ai-messages" id="aiMessages"></div>
+  <div class="ai-suggestions" id="aiSugs"></div>
+  <div class="ai-input-bar">
+    <input class="ai-input" id="aiInput" placeholder="Pregunta sobre esmaltes, colores, técnicas..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="ai-send" id="aiSendBtn" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let user = null;
+let space = 'taller';
+let nav = 'r';
+let calcW = 100;
+let liked = [];
+let myR = [];
+let commR = [];
+let newSt = 'testing';
+let aiHistory = [];
+let aiLoading = false;
+
+const suggestions = [
+  "¿Cómo logro un rosa valdiosera?",
+  "Mi esmalte quedó con burbujas, ¿por qué?",
+  "¿Qué pigmentos usar para cono 6?",
+  "¿Cuánto caolín lleva un esmalte blanco?",
+  "Tengo feldespato y caolín, ¿qué puedo hacer?",
+  "¿Por qué se corre mi esmalte?",
+  "¿Diferencia entre oxidación y reducción?",
+];
+
+const tips = [
+  {i:'🪨',n:'Feldespato potásico',t:['Fundente principal a cono 6. Máximo 40% o se corre.','Da brillo y transparencia.','Combina con carbonato de calcio para estabilidad.']},
+  {i:'⬜',n:'Caolín EPK',t:['Suspensor — evita que el esmalte se asiente.','10-15% ideal. Más de 20% causa grietas.','Aporta opacidad suave.']},
+  {i:'✨',n:'Óxido de titanio',t:['Opacificador blanco principal. 4-8%.','Puede crear efectos de cristalización.','Estable a cualquier temperatura.']},
+  {i:'💎',n:'Wollastonita',t:['Excelente para cono 6 — fluidez y brillo.','Sustituye parcialmente al carbonato de calcio.','Reduce contracción del esmalte.']},
+  {i:'🟤',n:'Bentonita',t:['Solo 1-2% máximo.','Mejora mucho la suspensión.','Hidratar antes de mezclar.']},
+  {i:'🏔️',n:'Carbonato de calcio',t:['Fundente secundario muy estable.','10-20% a cono 6.','Con dolomita mejora la textura.']},
+  {i:'🔵',n:'Óxido de cobalto',t:['Azules intensos. Máximo 2-3%.','Estable en cualquier atmósfera.','0.5% ya da un azul notable.']},
+  {i:'🔴',n:'Óxido de hierro rojo',t:['1-2% = amarillo/ocre. 8-10% = café oscuro.','En reducción puede dar rojos.','Muy económico y versátil.']},
+];
+
+// ── LOGIN ──
+function doLogin() {
+  const email = document.getElementById('lEmail').value || 'demo@ceramicaapp.com';
+  const name = email.split('@')[0];
+  user = {name, email, ini: name[0].toUpperCase()};
+  document.getElementById('userAv').textContent = user.ini;
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+  initAI();
+  render();
+}
+
+// ── SPACE ──
+function switchSpace(s) {
+  space = s;
+  document.getElementById('btnT').classList.toggle('active', s==='taller');
+  document.getElementById('btnC').classList.toggle('active', s==='comunidad');
+  document.getElementById('spaceLabel').textContent = s==='taller' ? 'Mi Taller 🔒' : 'Comunidad 🌍';
+  nav = 'r';
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-r').classList.add('active');
+  render();
+}
+
+// ── NAV ──
+function setNav(n, btn) {
+  nav = n;
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ── RENDER ──
+function render() {
+  renderPills();
+  const a = document.getElementById('scrollArea');
+  if (nav==='r') renderRecipes(a);
+  else if (nav==='c') renderCalc(a);
+  else if (nav==='a') renderAdd(a);
+  else if (nav==='t') renderTipsView(a);
+}
+
+function renderPills() {
+  const b = document.getElementById('pillBar');
+  if (nav !== 'r') { b.innerHTML=''; return; }
+  const opts = space==='taller'
+    ? ['Todas','✅ Probadas','🧪 En prueba','❌ Fallidas','Cono 6','Cono 10']
+    : ['Todas','❤️ Populares','🆕 Recientes','Cono 6','Cono 10'];
+  b.innerHTML = opts.map((o,i)=>`<button class="pill ${i===0?'active':''}" onclick="this.parentNode.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));this.classList.add('active')">${o}</button>`).join('');
+}
+
+// ── RECIPES ──
+function renderRecipes(a) {
+  const list = space==='taller' ? myR : commR;
+  if (list.length===0) {
+    if (space==='taller') {
+      a.innerHTML=`<div class="empty"><div class="empty-i">🔒</div><div class="empty-t">Tu taller está vacío</div><div class="empty-s">Guarda tus recetas privadas,<br>experimentos y resultados.<br>Solo tú puedes verlas.</div><button class="empty-cta" onclick="setNav('a',document.getElementById('nav-a'))">➕ Crear primera receta</button></div>`;
+    } else {
+      a.innerHTML=`<div class="comm-banner"><div class="cb-icon">🌍</div><div><div class="cb-title">Comunidad CeramicaApp</div><div class="cb-sub">Sé el primero en compartir<br>una receta con la comunidad.</div></div></div><div class="empty"><div class="empty-i">🏺</div><div class="empty-t">Aún no hay recetas</div><div class="empty-s">Comparte desde tu taller<br>tocando el botón 🌍</div></div>`;
+    }
+    return;
+  }
+  const cards = list.map(r=>`
+    <div class="card">
+      <div class="card-head" onclick="td('r${r.id}')">
+        <div class="swatch" style="background:${r.color};box-shadow:0 0 10px ${r.color}44"></div>
+        <div class="ci">
+          <div class="cn">${r.name}</div>
+          <div class="cm">${r.colorName||''} · Cono ${r.cone} · ${r.atm==='oxidation'?'Oxidación':'Reducción'}</div>
+          <div class="ctags">
+            ${r.status==='success'?'<span class="tag ok">✅ Probada</span>':r.status==='failed'?'<span class="tag fail">❌ Fallida</span>':'<span class="tag test">🧪 En prueba</span>'}
+            ${space==='comunidad'?`<span class="tag">👤 ${r.author}</span>`:''}
+          </div>
+        </div>
+        <div class="cactions">
+          ${space==='comunidad'
+            ?`<button class="ab ab-like ${liked.includes(r.id)?'liked':''}" onclick="event.stopPropagation();likeR(${r.id})">❤️ ${r.likes||0}</button>`
+            :`<button class="ab ab-share" onclick="event.stopPropagation();shareR(${r.id})">🌍</button>`
+          }
+          <button class="ab ab-calc" onclick="event.stopPropagation();qCalc(${r.id})">⚖️</button>
+          ${space==='taller'?`<button class="ab ab-del" onclick="event.stopPropagation();delR(${r.id})">🗑️</button>`:''}
+        </div>
+      </div>
+      <div class="card-detail" id="r${r.id}">
+        <div class="dl">INGREDIENTES</div>
+        ${r.ings.map(i=>`<div class="ir"><span class="in">${i.n}</span><span class="ip">${i.a}%</span></div>`).join('')}
+        ${r.notes?`<div class="nb">${r.notes}</div>`:''}
+      </div>
+    </div>
+  `).join('');
+  a.innerHTML = (space==='comunidad'?`<div class="comm-banner"><div class="cb-icon">🌍</div><div><div class="cb-title">Comunidad · ${list.length} receta${list.length!==1?'s':''}</div><div class="cb-sub">Toca 🌍 en tu taller para compartir</div></div></div>`:`<div style="font-size:10px;color:var(--dim);margin-bottom:10px">🔒 Solo visible para ti · ${list.length} receta${list.length!==1?'s':''}</div>`) + cards;
+}
+
+function td(id) { const e=document.getElementById(id); if(e) e.classList.toggle('open'); }
+function likeR(id) { if(liked.includes(id))return; liked.push(id); const r=commR.find(x=>x.id===id); if(r)r.likes=(r.likes||0)+1; render(); }
+function shareR(id) {
+  const r=myR.find(x=>x.id===id); if(!r)return;
+  if(commR.find(x=>x.id===id)){alert('Ya está en la comunidad ✅');return;}
+  if(confirm(`¿Compartir "${r.name}" con la comunidad?`)){commR.unshift({...r,author:user.name,likes:0});alert('¡Compartida con la comunidad! 🌍🏺');}
+}
+function delR(id) { if(confirm('¿Eliminar esta receta?')){myR=myR.filter(x=>x.id!==id);render();} }
+function qCalc(id) {
+  nav='c'; document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-c').classList.add('active'); render();
+  setTimeout(()=>{ const s=document.getElementById('calcSel'); if(s){s.value=id;updateCalc();} },80);
+}
+
+// ── CALC ──
+function renderCalc(a) {
+  const all=[...myR,...commR].filter((r,i,arr)=>arr.findIndex(x=>x.id===r.id)===i);
+  a.innerHTML=`
+    <div style="font-size:15px;font-weight:bold;color:var(--gold);margin-bottom:4px">⚖️ Calculadora</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Calcula cantidades exactas para tu lote</div>
+    <select class="fi" id="calcSel" onchange="updateCalc()" style="margin-bottom:8px">
+      <option value="">-- Elegir receta --</option>
+      ${all.map(r=>`<option value="${r.id}">${r.name}</option>`).join('')}
+    </select>
+    <div class="wb">
+      <button class="wbtn active" onclick="setW(100,this)">100g</button>
+      <button class="wbtn" onclick="setW(250,this)">250g</button>
+      <button class="wbtn" onclick="setW(500,this)">500g</button>
+      <button class="wbtn" onclick="setW(1000,this)">1kg</button>
+      <button class="wbtn" onclick="setW(2000,this)">2kg</button>
+    </div>
+    <input class="fi" type="number" id="wInput" value="${calcW}" placeholder="O escribe el peso..." oninput="updateCalc()">
+    <div id="calcRes"></div>
+  `;
+}
+function setW(w,btn) { calcW=w; const i=document.getElementById('wInput'); if(i)i.value=w; document.querySelectorAll('.wbtn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); updateCalc(); }
+function updateCalc() {
+  const w=parseInt(document.getElementById('wInput')?.value)||0; calcW=w;
+  const id=parseInt(document.getElementById('calcSel')?.value);
+  const all=[...myR,...commR]; const r=all.find(x=>x.id===id);
+  const div=document.getElementById('calcRes'); if(!div)return;
+  if(!r||!w){div.innerHTML='';return;}
+  div.innerHTML=`<div class="cr-card"><div style="display:flex;align-items:center;gap:7px;margin-bottom:9px"><div style="width:20px;height:20px;border-radius:5px;background:${r.color}"></div><span style="font-size:13px;font-weight:bold;color:var(--gold)">${r.name}</span></div><div style="font-size:10px;color:var(--muted);margin-bottom:8px">Resultados para ${w}g</div>${r.ings.map(i=>`<div class="cr-row"><span class="cr-ing">${i.n}</span><span class="cr-g">${((i.a/100)*w).toFixed(1)}g</span></div>`).join('')}<div class="cr-total"><span>Total</span><span>${w}g</span></div></div>`;
+}
+
+// ── ADD ──
+function renderAdd(a) {
+  newSt='testing';
+  a.innerHTML=`
+    <div class="fs"><span class="fl">INFORMACIÓN BÁSICA</span>
+      <input class="fi" id="nName" placeholder="Nombre de la receta">
+      <div class="fr"><select class="fi" id="nCone"><option value="04">Cono 04</option><option value="6" selected>Cono 6</option><option value="10">Cono 10</option></select><select class="fi" id="nAtm"><option value="oxidation">Oxidación</option><option value="reduction">Reducción</option></select></div>
+      <div class="cp-row"><input class="fi" id="nColor" placeholder="Color resultante"><input type="color" id="nPicker" value="#E8B4A0"></div>
+    </div>
+    <div class="fs"><span class="fl">INGREDIENTES</span>
+      <div id="nIngs"><div class="ip-pair"><input class="fi" type="text" placeholder="Ingrediente"><input class="fi" type="number" placeholder="%"></div></div>
+      <button class="aib" onclick="addIng()">+ Agregar ingrediente</button>
+    </div>
+    <div class="fs"><span class="fl">ESTADO</span>
+      <div class="sr">
+        <button class="so s-test" id="st-test" onclick="setSt('testing')">🧪 En prueba</button>
+        <button class="so" id="st-ok" onclick="setSt('success')">✅ Probada</button>
+        <button class="so" id="st-fail" onclick="setSt('failed')">❌ Fallida</button>
+      </div>
+    </div>
+    <div class="fs"><span class="fl">NOTAS</span>
+      <textarea class="fi" id="nNotes" rows="3" placeholder="Observaciones, cómo quedó horneada..."></textarea>
+    </div>
+    <button class="sbtn" onclick="submitR()">🔒 Guardar en Mi Taller</button>
+    <div style="text-align:center;font-size:10px;color:var(--dim);margin-top:8px;line-height:1.6">Se guarda privado en tu taller.<br>Tú decides si compartirlo con la comunidad.</div>
+  `;
+}
+function addIng() { const d=document.createElement('div'); d.className='ip-pair'; d.innerHTML='<input class="fi" type="text" placeholder="Ingrediente"><input class="fi" type="number" placeholder="%">'; document.getElementById('nIngs').appendChild(d); }
+function setSt(s) {
+  newSt=s;
+  document.getElementById('st-test').className='so'+(s==='testing'?' s-test':'');
+  document.getElementById('st-ok').className='so'+(s==='success'?' s-ok':'');
+  document.getElementById('st-fail').className='so'+(s==='failed'?' s-fail':'');
+}
+function submitR() {
+  const name=document.getElementById('nName').value.trim();
+  if(!name){alert('Escribe el nombre');return;}
+  const pairs=document.querySelectorAll('#nIngs .ip-pair');
+  const ings=[];
+  pairs.forEach(p=>{const ins=p.querySelectorAll('input');if(ins[0].value.trim())ings.push({n:ins[0].value.trim(),a:parseFloat(ins[1].value)||0});});
+  if(!ings.length){alert('Agrega al menos un ingrediente');return;}
+  myR.unshift({id:Date.now(),name,cone:document.getElementById('nCone').value,atm:document.getElementById('nAtm').value,color:document.getElementById('nPicker').value,colorName:document.getElementById('nColor').value,ings,status:newSt,notes:document.getElementById('nNotes').value,author:user.name,likes:0});
+  alert('✅ Guardada en tu taller');
+  nav='r'; space='taller';
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-r').classList.add('active');
+  document.getElementById('btnT').classList.add('active');
+  document.getElementById('btnC').classList.remove('active');
+  render();
+}
+
+// ── TIPS ──
+function renderTipsView(a) {
+  a.innerHTML=`<div style="font-size:15px;font-weight:bold;color:var(--gold);margin-bottom:4px">💡 Tips por material</div><div style="font-size:11px;color:var(--muted);margin-bottom:12px">Consejos esenciales por ingrediente</div>`+
+  tips.map(t=>`<div class="tc"><div class="th"><span style="font-size:20px">${t.i}</span><span style="font-size:13px;font-weight:bold;color:var(--gold)">${t.n}</span></div><div class="tb">${t.t.map(x=>`<div class="ti"><span class="ta">▸</span><span class="tt">${x}</span></div>`).join('')}</div></div>`).join('');
+}
+
+// ── PROFILE ──
+function showProfile() {
+  document.getElementById('pillBar').innerHTML='';
+  document.getElementById('scrollArea').innerHTML=`
+    <div class="prof-header">
+      <div class="prof-av">${user.ini}</div>
+      <div class="prof-name">${user.name}</div>
+      <div class="prof-email">${user.email}</div>
+      <div class="stats">
+        <div class="stat"><div class="sn">${myR.length}</div><div class="sl">En taller</div></div>
+        <div class="stat"><div class="sn">${commR.filter(r=>r.author===user.name).length}</div><div class="sl">Compartidas</div></div>
+        <div class="stat"><div class="sn">${myR.filter(r=>r.status==='success').length}</div><div class="sl">Probadas</div></div>
+      </div>
+    </div>
+    <div class="fs" style="text-align:center">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Plan actual</div>
+      <div style="font-size:18px;font-weight:bold;color:var(--gold)">✨ Pro</div>
+      <div style="font-size:11px;color:var(--dim);margin-top:4px">Incluye IA Cerámica ilimitada</div>
+    </div>
+    <button class="logout" onclick="logout()">Cerrar sesión</button>
+  `;
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+}
+function logout() { if(confirm('¿Cerrar sesión?')){user=null;myR=[];commR=[];liked=[];aiHistory=[];document.getElementById('appScreen').classList.remove('active');document.getElementById('loginScreen').classList.add('active');} }
+
+// ── AI CHAT ──
+function initAI() {
+  aiHistory = [];
+  const msgs = document.getElementById('aiMessages');
+  msgs.innerHTML = '';
+  addBotMsg(`¡Hola ${user.name}! 👋 Soy tu asistente cerámico especializado.\n\nPuedo ayudarte con:\n• Recetas de esmaltes y pigmentos\n• Diagnóstico de problemas\n• Técnicas de aplicación\n• Combinaciones de colores\n• Cualquier duda cerámica\n\n¿En qué te ayudo hoy? 🏺`);
+  renderSuggestions();
+}
+
+function openAI() {
+  document.getElementById('aiScreen').classList.add('open');
+  document.getElementById('aiInput').focus();
+}
+
+function closeAI() {
+  document.getElementById('aiScreen').classList.remove('open');
+}
+
+function renderSuggestions() {
+  document.getElementById('aiSugs').innerHTML = suggestions.map(s=>
+    `<button class="sug" onclick="sendSug(this)">${s}</button>`
+  ).join('');
+}
+
+function sendSug(btn) {
+  document.getElementById('aiInput').value = btn.textContent;
+  sendMsg();
+}
+
+function addBotMsg(text) {
+  const msgs = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `<div class="msg-avatar bot">🤖</div><div class="bubble bot">${text.replace(/\n/g,'<br>')}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMsg(text) {
+  const msgs = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="bubble usr">${text}</div><div class="msg-avatar usr">${user.ini}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'msg'; div.id = 'typing';
+  div.innerHTML = `<div class="msg-avatar bot">🤖</div><div class="bubble bot typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+async function sendMsg() {
+  const input = document.getElementById('aiInput');
+  const text = input.value.trim();
+  if (!text || aiLoading) return;
+  input.value = '';
+  document.getElementById('aiSugs').innerHTML = '';
+  addUserMsg(text);
+  aiLoading = true;
+  document.getElementById('aiSendBtn').disabled = true;
+  showTyping();
+
+  aiHistory.push({ role: 'user', content: text });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `Eres un experto ceramista y químico especializado en esmaltes cerámicos. 
+Tu nombre es "Asistente Cerámico" dentro de CeramicaApp.
+Ayudas a ceramistas con:
+- Recetas de esmaltes y sus ingredientes
+- Pigmentos y combinaciones de colores
+- Diagnóstico de problemas (burbujas, craquelado, corrimiento, etc.)
+- Técnicas de aplicación (inmersión, pincel, aerógrafo)
+- Temperaturas y conos de cocción
+- Compatibilidad de materiales
+- Tips y consejos prácticos
+
+El usuario trabaja principalmente con:
+- Horno eléctrico a cono 6 (~1222°C)
+- Arcilla 931 de Weico (Tonalá, Guadalajara)
+- Pigmentos Ceramicolor Serie C
+- Aplicación de esmaltes delgados
+
+Responde en español de forma clara, práctica y amigable. 
+Usa emojis ocasionalmente para hacer la respuesta más visual.
+Sé conciso pero completo. Máximo 200 palabras por respuesta.`,
+        messages: aiHistory,
+      })
+    });
+
+    const data = await response.json();
+    hideTyping();
+
+    const reply = data.content?.map(c => c.text || '').join('') || 'Lo siento, no pude procesar tu pregunta. Intenta de nuevo.';
+    aiHistory.push({ role: 'assistant', content: reply });
+    addBotMsg(reply);
+
+  } catch (err) {
+    hideTyping();
+    addBotMsg('Hubo un error de conexión. Por favor intenta de nuevo. 🔄');
+  }
+
+  aiLoading = false;
+  document.getElementById('aiSendBtn').disabled = false;
+  document.getElementById('aiInput').focus();
+}
+
+// INIT
+render();
+</script>
+</body>
+</html>
